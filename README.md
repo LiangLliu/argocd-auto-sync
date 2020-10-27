@@ -30,6 +30,10 @@ gitops:
 ./gradlew fatJar
 ```
 
+* 运行
+```shell script
+java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar 
+```
 
 * 构建生成jar包并运行
 ```shell script

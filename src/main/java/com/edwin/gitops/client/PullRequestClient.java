@@ -1,7 +1,5 @@
 package com.edwin.gitops.client;
 
-import com.edwin.gitops.domain.common.Commit;
-import com.edwin.gitops.domain.common.GitHubFile;
 import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.domain.pulls.PullRequest;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +19,7 @@ public class PullRequestClient {
 
     private final String ACCESS_TOKEN_PARA;
 
-    private final String PULL_URL = "/pulls";
-    private final String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
+    private static final String PULL_URL = "/pulls";
 
     private final String DEFAULT_BASE_BRANCH;
     private final String MERGE_COMMIT_MESSAGE;
@@ -41,6 +38,7 @@ public class PullRequestClient {
         String url = baseUrl + PULL_URL + ACCESS_TOKEN_PARA + authorization;
 
         Map<String, Object> paramMap = new HashMap<>();
+        String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
         paramMap.put("title", CREATE_PULL_REQUEST_TITLE);
         paramMap.put("head", PR_BRANCH_NAME);
         paramMap.put("base", DEFAULT_BASE_BRANCH);

@@ -12,8 +12,8 @@ import java.util.Map;
 
 public class ContentClient {
 
-    private final String CONTENT_URL = "/contents";
-    private final String UPDATE_BY_MESSAGE = "update file, modify tag";
+    private static final String CONTENT_URL = "/contents";
+    private static final String UPDATE_BY_MESSAGE = "update file, modify tag";
     private final String NEW_BRANCH;
 
     private final RestTemplate restTemplate;
@@ -29,13 +29,13 @@ public class ContentClient {
 
 
     public Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) {
-        String url = baseUrl + CONTENT_URL + repoFilepath + ACCESS_TOKEN_PARA + authorization;
+        String url = getURL(baseUrl, authorization, repoFilepath);
         ResponseEntity<Content> contentResponseEntity = restTemplate.getForEntity(url, Content.class);
         return contentResponseEntity.getBody();
     }
 
-    public Content updateContent(String baseUrl, String authorization, String repoFilepath,
-                                 Map<String, String> replaceMap) {
+    public void updateContent(String baseUrl, String authorization, String repoFilepath,
+                              Map<String, String> replaceMap) {
 
         Content content = getContentFileByPath(baseUrl, authorization, repoFilepath);
 
@@ -49,10 +49,18 @@ public class ContentClient {
         paramMap.put("branch", NEW_BRANCH);
 
         String url = baseUrl + CONTENT_URL + "/" + repoFilepath + ACCESS_TOKEN_PARA + authorization;
-
         restTemplate.put(url, paramMap);
 
-        return getContentFileByPath(baseUrl, authorization, repoFilepath);
+        getContentFileByPath(baseUrl, authorization, repoFilepath);
+    }
+
+    private String getURL(String baseUrl, String authorization, String repoFilepath) {
+
+        return baseUrl +
+                CONTENT_URL +
+                repoFilepath +
+                ACCESS_TOKEN_PARA +
+                authorization;
     }
 
 }

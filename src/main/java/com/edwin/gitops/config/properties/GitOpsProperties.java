@@ -4,11 +4,9 @@ import com.edwin.gitops.utils.RandomUtil;
 
 public class GitOpsProperties {
 
-    private final String accessTokenPara = "?access_token=";
+    private static final String accessTokenPara = "?access_token=";
 
     private String newBranchName = "branch-" + RandomUtil.generate();
-
-    private String tempDirectoryPath = "temp-files/";
 
     private String propertiesFilePath = "values-dev.yaml";
 
@@ -24,14 +22,6 @@ public class GitOpsProperties {
 
     public void setNewBranchName(String newBranchName) {
         this.newBranchName = newBranchName;
-    }
-
-    public String getTempDirectoryPath() {
-        return tempDirectoryPath;
-    }
-
-    public void setTempDirectoryPath(String tempDirectoryPath) {
-        this.tempDirectoryPath = tempDirectoryPath;
     }
 
     public String getPropertiesFilePath() {

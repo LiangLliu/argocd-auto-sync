@@ -15,9 +15,7 @@ public class RefsClient {
 
     private final RestTemplate restTemplate;
 
-    private final String GIT_REFS_HEAD_URL = "/git/refs/heads";
-    private final String REFS_HEADS = "refs/heads/";
-    private final String GIT_REFS = "/git/refs";
+    private static final String GIT_REFS_HEAD_URL = "/git/refs/heads";
 
     private final String DEFAULT_BASE_BRANCH;
 
@@ -36,28 +34,48 @@ public class RefsClient {
 
 
     public Refs getMasterRefs(String baseUrl, String authorization) {
-        String url = baseUrl + GIT_REFS_HEAD_URL + "/" + DEFAULT_BASE_BRANCH + ACCESS_TOKEN_PARA + authorization;
+        String url = getDefaultBranch(baseUrl, authorization);
         ResponseEntity<Refs> responseEntity = restTemplate.getForEntity(url, Refs.class);
         return responseEntity.getBody();
     }
 
     public Refs createRefs(String baseUrl, String authorization, String masterBranchSHA) {
-        String url = baseUrl + GIT_REFS + ACCESS_TOKEN_PARA + authorization;
+
+        String url = baseUrl + "/git/refs" + ACCESS_TOKEN_PARA + authorization;
+
         Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("ref", REFS_HEADS + NEW_BRANCH_NAME);
+        paramMap.put("ref", "refs/heads/" + NEW_BRANCH_NAME);
         paramMap.put("sha", masterBranchSHA);
+
         return restTemplate.postForEntity(url, paramMap, Refs.class).getBody();
     }
 
 
-    public Refs createRefsByMasterBranch(String baseUrl, String authorization) {
+    public void createRefsByMasterBranch(String baseUrl, String authorization) {
         String masterBranchSHA = getMasterBranchSHA(baseUrl, authorization);
-        return createRefs(baseUrl, authorization, masterBranchSHA);
+        createRefs(baseUrl, authorization, masterBranchSHA);
     }
 
     public void deleteRefs(String baseUrl, String authorization) {
-        String url = baseUrl + GIT_REFS_HEAD_URL + "/" + NEW_BRANCH_NAME + ACCESS_TOKEN_PARA + authorization;
+        String url = getNewBranchUrl(baseUrl, authorization);
         restTemplate.delete(url);
+    }
+
+    private String getNewBranchUrl(String baseUrl, String authorization) {
+        return getBranch(baseUrl, authorization, NEW_BRANCH_NAME);
+    }
+
+    private String getDefaultBranch(String baseUrl, String authorization) {
+        return getBranch(baseUrl, authorization, DEFAULT_BASE_BRANCH);
+    }
+
+    private String getBranch(String baseUrl, String authorization, String branchName) {
+        return baseUrl +
+                GIT_REFS_HEAD_URL +
+                "/" +
+                branchName +
+                ACCESS_TOKEN_PARA +
+                authorization;
     }
 
 

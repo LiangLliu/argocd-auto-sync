@@ -8,6 +8,7 @@ import com.edwin.gitops.service.GitHubOpsService;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -16,9 +17,7 @@ public class GitOpsApplication {
     private static final RestTemplate restTemplate = new RestTemplate();
     private static final GitOpsProperties gitOpsProperties = new GitOpsProperties();
 
-
     public static void main(String[] args) throws IOException {
-
 
         System.out.println(getImage());
 
@@ -33,7 +32,7 @@ public class GitOpsApplication {
         String baseUrl = "https://api.github.com/repos/" + userAndRepo;
 
         Map<String, String> replaceMap = Map.of(
-                "image.tag", "aaa",
+                "image.tag", "" + Instant.now().toEpochMilli(),
                 "replicaCount", "5"
         );
 
@@ -47,7 +46,6 @@ public class GitOpsApplication {
         System.out.println(masterBranchSHA);
 
         GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient, contentClient, refsClient);
-
 
         gitHubOpsService.updateDeploymentTag(baseUrl, token, filePath, replaceMap);
 
