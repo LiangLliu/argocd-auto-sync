@@ -3,6 +3,7 @@ package com.edwin.gitops.utils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -17,10 +18,9 @@ public class GitOpsPropertiesUtilTest {
     @Test
     public void should_replace_props_string_when_given_one_content_and_replace_map() {
 
-        Map<String, String> replaceMap = Map.of(
-                "image.tag", "aaa",
-                "replicaCount", "5"
-        );
+        Map<String ,String> replaceMap = new HashMap<>();
+        replaceMap.put("image.tag", "aaa");
+        replaceMap.put("replicaCount", "5");
 
         String expectContent = "image.repository=test\n" +
                 "image.pullPolicy=test\n" +

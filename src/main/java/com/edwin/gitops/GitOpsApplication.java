@@ -33,6 +33,7 @@ public class GitOpsApplication {
         GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient, contentClient, refsClient);
 
         gitHubOpsService.updateDeploymentTag(paraObject);
+        System.out.println("------------------finish------------------------\n");
 
     }
 
