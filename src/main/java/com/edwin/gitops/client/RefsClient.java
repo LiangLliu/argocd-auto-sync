@@ -15,16 +15,14 @@ public class RefsClient {
 
     private final RestTemplate restTemplate;
 
-    private final String GIT_REFS_HEAD_URL;
-    private final String REFS_HEADS;
-    private final String GIT_REFS;
+    private final String GIT_REFS_HEAD_URL = "/git/refs/heads";
+    private final String REFS_HEADS = "refs/heads/";
+    private final String GIT_REFS = "/git/refs";
+
     private final String DEFAULT_BASE_BRANCH;
 
     public RefsClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.GIT_REFS_HEAD_URL = gitOpsProperties.getRefs().getGitRefsHeadUrl();
-        this.REFS_HEADS = gitOpsProperties.getRefs().getRefsHeads();
-        this.GIT_REFS = gitOpsProperties.getRefs().getGitRefs();
         this.ACCESS_TOKEN_PARA = gitOpsProperties.getAccessTokenPara();
         this.NEW_BRANCH_NAME = gitOpsProperties.getNewBranchName();
         this.DEFAULT_BASE_BRANCH = gitOpsProperties.getDefaultBranch();

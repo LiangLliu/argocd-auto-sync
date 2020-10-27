@@ -4,7 +4,6 @@ import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.domain.content.Content;
 import com.edwin.gitops.utils.ContentUtil;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
@@ -13,18 +12,17 @@ import java.util.Map;
 
 public class ContentClient {
 
-    private final String CONTENT_URL;
-    private final String UPDATE_BY_MESSAGE;
-    private final String DEFAULT_BRANCH;
+    private final String CONTENT_URL = "/contents";
+    private final String UPDATE_BY_MESSAGE = "update file, modify tag";
+    private final String NEW_BRANCH;
 
     private final RestTemplate restTemplate;
 
     private final String ACCESS_TOKEN_PARA;
 
     public ContentClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
-        this.CONTENT_URL = gitOpsProperties.getContent().getContentUrl();
-        this.UPDATE_BY_MESSAGE = gitOpsProperties.getContent().getUpdateContentMessage();
-        this.DEFAULT_BRANCH = gitOpsProperties.getDefaultBranch();
+
+        this.NEW_BRANCH = gitOpsProperties.getNewBranchName();
         this.restTemplate = restTemplate;
         this.ACCESS_TOKEN_PARA = gitOpsProperties.getAccessTokenPara();
     }
@@ -36,11 +34,10 @@ public class ContentClient {
         return contentResponseEntity.getBody();
     }
 
-    public Content updateContent(String baseUrl, String authorization, String repoFilepath, String branchName,
+    public Content updateContent(String baseUrl, String authorization, String repoFilepath,
                                  Map<String, String> replaceMap) {
 
         Content content = getContentFileByPath(baseUrl, authorization, repoFilepath);
-        System.out.println("file_SHA:  " + content.getSha() + " \n");
 
         String data = ContentUtil.replaceData(content, replaceMap);
 
@@ -49,7 +46,7 @@ public class ContentClient {
         paramMap.put("message", UPDATE_BY_MESSAGE);
         paramMap.put("content", contentBase64);
         paramMap.put("sha", content.getSha());
-        paramMap.put("branch", StringUtils.isEmpty(branchName) ? DEFAULT_BRANCH : branchName);
+        paramMap.put("branch", NEW_BRANCH);
 
         String url = baseUrl + CONTENT_URL + "/" + repoFilepath + ACCESS_TOKEN_PARA + authorization;
 

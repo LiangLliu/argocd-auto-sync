@@ -14,10 +14,6 @@ public class GitOpsProperties {
 
     private String defaultBranch = "main";
 
-    private ContentProperties content = new ContentProperties();
-    private PullsProperties pulls = new PullsProperties();
-    private RefsProperties refs = new RefsProperties();
-
     public String getAccessTokenPara() {
         return accessTokenPara;
     }
@@ -54,27 +50,4 @@ public class GitOpsProperties {
         this.defaultBranch = defaultBranch;
     }
 
-    public ContentProperties getContent() {
-        return content;
-    }
-
-    public void setContent(ContentProperties content) {
-        this.content = content;
-    }
-
-    public PullsProperties getPulls() {
-        return pulls;
-    }
-
-    public void setPulls(PullsProperties pulls) {
-        this.pulls = pulls;
-    }
-
-    public RefsProperties getRefs() {
-        return refs;
-    }
-
-    public void setRefs(RefsProperties refs) {
-        this.refs = refs;
-    }
 }

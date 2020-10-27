@@ -21,18 +21,17 @@ public class PullRequestClient {
 
     private final String ACCESS_TOKEN_PARA;
 
-    private final String PULL_URL;
-    private final String CREATE_PULL_REQUEST_TITLE;
+    private final String PULL_URL = "/pulls";
+    private final String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
 
     private final String DEFAULT_BASE_BRANCH;
     private final String MERGE_COMMIT_MESSAGE;
 
     public PullRequestClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.PULL_URL = gitOpsProperties.getPulls().getPullsUrl();
-        this.CREATE_PULL_REQUEST_TITLE = gitOpsProperties.getPulls().getCreatePullRequestTitle();
+
         this.DEFAULT_BASE_BRANCH = gitOpsProperties.getDefaultBranch();
-        this.MERGE_COMMIT_MESSAGE = gitOpsProperties.getPulls().getMergeCommitMessage();
+        this.MERGE_COMMIT_MESSAGE = "merge-message,time by " + Instant.now();
         this.ACCESS_TOKEN_PARA = gitOpsProperties.getAccessTokenPara();
         this.PR_BRANCH_NAME = gitOpsProperties.getNewBranchName();
     }

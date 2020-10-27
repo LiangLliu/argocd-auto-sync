@@ -5,22 +5,17 @@ import com.edwin.gitops.client.PullRequestClient;
 import com.edwin.gitops.client.RefsClient;
 import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.service.GitHubOpsService;
-import com.edwin.gitops.service.UpdateTagRequest;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-
 public class GitOpsApplication {
 
     private static final RestTemplate restTemplate = new RestTemplate();
     private static final GitOpsProperties gitOpsProperties = new GitOpsProperties();
 
-    private static final RefsClient refsClient = new RefsClient(gitOpsProperties, restTemplate);
-    private static final ContentClient contentClient = new ContentClient(gitOpsProperties, restTemplate);
-    private static final PullRequestClient pullRequestClient = new PullRequestClient(gitOpsProperties, restTemplate);
 
     public static void main(String[] args) throws IOException {
 
@@ -31,19 +26,30 @@ public class GitOpsApplication {
         System.out.println(Arrays.toString(args));
         System.out.println("-------------------------------------");
 
-        UpdateTagRequest request = new UpdateTagRequest();
+        String userAndRepo = "";
+        String token = "";
+        String filePath = "values-dev.yaml";
 
-        String masterBranchSHA = refsClient.getMasterBranchSHA(request.getDeploymentPath(), request.getToken());
-        System.out.println(masterBranchSHA);
-
-        GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient, contentClient, refsClient, gitOpsProperties);
+        String baseUrl = "https://api.github.com/repos/" + userAndRepo;
 
         Map<String, String> replaceMap = Map.of(
                 "image.tag", "aaa",
                 "replicaCount", "5"
         );
 
-        gitHubOpsService.updateDeploymentTag(request, replaceMap);
+        gitOpsProperties.setPropertiesFilePath(filePath);
+
+        final RefsClient refsClient = new RefsClient(gitOpsProperties, restTemplate);
+        final ContentClient contentClient = new ContentClient(gitOpsProperties, restTemplate);
+        final PullRequestClient pullRequestClient = new PullRequestClient(gitOpsProperties, restTemplate);
+
+        String masterBranchSHA = refsClient.getMasterBranchSHA(baseUrl, token);
+        System.out.println(masterBranchSHA);
+
+        GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient, contentClient, refsClient);
+
+
+        gitHubOpsService.updateDeploymentTag(baseUrl, token, filePath, replaceMap);
 
 
     }

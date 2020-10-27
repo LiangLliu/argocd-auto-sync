@@ -1,4 +1,0 @@
-gitops:
-  properties-file-path: values-dev.yaml
-  default-branch: main
-
