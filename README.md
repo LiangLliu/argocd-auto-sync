@@ -60,26 +60,19 @@ docker exec -it github_ops sh
 ## 配置参数
 * 默认路径为：gitops ： 
 
-| 属性名              |    默认配置内容    |  说明  |
+| 属性名              |    示例    |  说明  |
 |:-------------------|:---------------:|:------|
-| defaultBranch      | main            | 默认主分支                                      |
-| newBranchName      | new-branch      | 新分支名称，用于新建PR，创建后悔删除                 |
-| tempDirectoryPath  | temp-files/      | 临时文件缓存目录，用于保存临时处理的文件，处理后会被删除 |
-| propertiesFilePath | -               | 需要做配置                                      |
+| userAndRepo        | user/repo           | 访问的github地址              |
+| token              | xxxxxxxxxxx      | 访问github的令牌                 |
+| filePath            | 配置文件所在的粒径   | 临时文件缓存目录，用于保存临时处理的文件，处理后会被删除 |
+| replaceMap         | <key,value>       | 需要替换的内容                                      |
 
-* PullsProperties 相关配置，路径： gitops.pulls:   
+* 示例
+```shell script
+java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar user/repo token filepath [image.tag=11111, replicaCount=5]
+```
+```shell script
+java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar user/repo token filepath \[image.tag=11111,replicaCount=5\]
 
-| 属性名                  |    默认配置内容        |  说明          |
-|:-----------------------|:-------------------:|:---------------|
-| createPullRequestTitle | create-pull-request | 创建PR时的标题   |
-| updatePullRequestTitle | update-pull-request | 更新PR时的标题   |
-| mergeCommitMessage     | merge-message       | merge时的信息   |
-
-
-* ContentProperties 相关配置，路径： gitops.content:   
-
-| 属性名                  |    默认配置内容           |  说明               |
-|:-----------------------|:----------------------:|:---------------------|
-| target                 | tag:                   | 替换文件内容时的target  |
-| updateContentMessage   | update file, modify tag | 替换文件时的信息        |
+```
 

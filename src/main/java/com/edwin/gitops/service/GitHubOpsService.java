@@ -3,6 +3,7 @@ package com.edwin.gitops.service;
 import com.edwin.gitops.client.ContentClient;
 import com.edwin.gitops.client.PullRequestClient;
 import com.edwin.gitops.client.RefsClient;
+import com.edwin.gitops.domain.ParaObject;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,5 +28,11 @@ public class GitHubOpsService {
         contentClient.updateContent(baseUrl, authorization, filePath, replaceMap);
         pullRequestClient.createAndMergePullRequest(baseUrl, authorization);
         refsClient.deleteRefs(baseUrl, authorization);
+    }
+
+    public void updateDeploymentTag(ParaObject paraObject) throws IOException {
+
+        updateDeploymentTag(paraObject.getUrl(), paraObject.getToken(),
+                paraObject.getFilePath(), paraObject.getReplaceMap());
     }
 }

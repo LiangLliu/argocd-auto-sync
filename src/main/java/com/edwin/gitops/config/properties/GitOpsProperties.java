@@ -8,8 +8,6 @@ public class GitOpsProperties {
 
     private String newBranchName = "branch-" + RandomUtil.generate();
 
-    private String propertiesFilePath = "values-dev.yaml";
-
     private String defaultBranch = "main";
 
     public String getAccessTokenPara() {
@@ -24,13 +22,6 @@ public class GitOpsProperties {
         this.newBranchName = newBranchName;
     }
 
-    public String getPropertiesFilePath() {
-        return propertiesFilePath;
-    }
-
-    public void setPropertiesFilePath(String propertiesFilePath) {
-        this.propertiesFilePath = propertiesFilePath;
-    }
 
     public String getDefaultBranch() {
         return defaultBranch;
