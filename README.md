@@ -2,28 +2,7 @@
 
 使用github api 操作github。
 
-## 更新指定repo中的文件
-
-```
-put localhost:8080/gitops
-```
-
-```json
-{
-    "deploymentPath":"your deployment repo",
-    "token":"your github token",
-    "imageTag":"replace test"
-}
-``` 
-
-* 需设置repo中修改文件的路径，以及默认分支名称
-```yaml
-gitops:
-  properties-file-path: values-dev.yaml
-  default-branch: master
-```
-
-## docker 打包
+## 构建jar包
 
 * 构建jar包
 ```shell script
@@ -33,29 +12,8 @@ gitops:
 * 运行
 ```shell script
 java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar 
-```
+```  
 
-* 构建生成jar包并运行
-```shell script
-./gradlew build -x test && java -jar build/libs/git-ops-0.0.1-SNAPSHOT.jar
-
-```
-
-* 生成 docker image
-```docker
-docker build -t localhost/github-ops .
-```
-
-
-* 启动docker image
-```docker
-docker run --name github_ops -p 8080:8080 -t localhost/github-ops
-```
-
-* 进入docker container
-```docker
-docker exec -it github_ops sh
-``` 
 
 ## 配置参数
 * 默认路径为：gitops ： 
@@ -75,4 +33,32 @@ java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar user/repo token filepath 
 java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar user/repo token filepath \[image.tag=11111,replicaCount=5\]
 
 ```
+
+
+
+
+## docker 打包
+
+
+* 构建生成jar包并运行
+```shell script
+./gradlew clean && ./gradlew fatJar -x test && java -jar git-ops-fatJar-0.0.1-SNAPSHOT.jar
+
+```
+
+* 生成 docker image
+```docker
+docker build -t localhost/github-ops .
+```
+
+
+* 启动docker image
+```docker
+docker run --name github_ops -p 8080:8080 -t localhost/github-ops user/repo token filepath \[image.tag=11111,replicaCount=5\] 
+```
+
+* 进入docker container
+```docker
+docker exec -it github_ops sh
+``` 
 
