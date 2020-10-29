@@ -8,7 +8,7 @@ public class GitOpsProperties {
 
     private String newBranchName = "branch-" + RandomUtil.generate();
 
-    private String defaultBranch = "main";
+    private String defaultBranch = "master";
 
     public String getAccessTokenPara() {
         return accessTokenPara;
