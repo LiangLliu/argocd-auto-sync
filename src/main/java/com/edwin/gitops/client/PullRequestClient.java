@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
-import java.util.*;
 
 /**
  * https://docs.github.com/en/free-pro-team@latest/rest/reference/pulls#create-a-pull-request
@@ -47,7 +46,6 @@ public class PullRequestClient {
         payload.add("head", new JsonPrimitive(PR_BRANCH_NAME));
         payload.add("base", new JsonPrimitive(DEFAULT_BASE_BRANCH));
 
-
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
         ResponseEntity<PullRequest> pullRequestResponseEntity = restTemplate.exchange(
@@ -74,9 +72,7 @@ public class PullRequestClient {
                 HttpMethod.PUT,
                 new HttpEntity<>(payload.toString(), headers),
                 Void.class);
-
     }
-
 
     public void createAndMergePullRequest(String baseUrl, String authorization) {
         PullRequest pullRequest = createPullRequest(baseUrl, authorization);

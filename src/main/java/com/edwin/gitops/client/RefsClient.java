@@ -9,8 +9,6 @@ import org.springframework.http.*;
 
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
-
 public class RefsClient {
     private final String NEW_BRANCH_NAME;
 
@@ -40,9 +38,6 @@ public class RefsClient {
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", authorization);
-
         ResponseEntity<Refs> responseEntity = restTemplate.exchange(url,
                 HttpMethod.GET,
                 new HttpEntity<String>(headers),
@@ -51,14 +46,13 @@ public class RefsClient {
         return responseEntity.getBody();
     }
 
-    public Refs createRefs(String baseUrl, String authorization, String masterBranchSHA) {
+    public void createRefs(String baseUrl, String authorization, String masterBranchSHA) {
 
         String url = baseUrl + "/git/refs";
 
         JsonObject payload = new JsonObject();
         payload.add("ref", new JsonPrimitive("refs/heads/" + NEW_BRANCH_NAME));
         payload.add("sha", new JsonPrimitive(masterBranchSHA));
-
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
@@ -67,7 +61,7 @@ public class RefsClient {
                 new HttpEntity<>(payload.toString(), headers),
                 Refs.class);
 
-        return responseEntity.getBody();
+        responseEntity.getBody();
     }
 
 

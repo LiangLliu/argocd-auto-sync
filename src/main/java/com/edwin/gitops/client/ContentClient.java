@@ -3,11 +3,16 @@ package com.edwin.gitops.client;
 import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.domain.content.Content;
 import com.edwin.gitops.utils.ContentUtil;
+import com.edwin.gitops.utils.HttpUtil;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ContentClient {
@@ -18,49 +23,50 @@ public class ContentClient {
 
     private final RestTemplate restTemplate;
 
-    private final String ACCESS_TOKEN_PARA;
-
     public ContentClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
 
         this.NEW_BRANCH = gitOpsProperties.getNewBranchName();
         this.restTemplate = restTemplate;
-        this.ACCESS_TOKEN_PARA = gitOpsProperties.getAccessTokenPara();
     }
 
-
     public Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) {
-        String url = getURL(baseUrl, authorization, repoFilepath);
-        ResponseEntity<Content> contentResponseEntity = restTemplate.getForEntity(url, Content.class);
+
+
+        String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
+
+        HttpHeaders headers = HttpUtil.getHeaders(authorization);
+
+        ResponseEntity<Content> contentResponseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<String>(headers),
+                Content.class);
         return contentResponseEntity.getBody();
     }
 
-    public void updateContent(String baseUrl, String authorization, String repoFilepath,
-                              Map<String, String> replaceMap) {
+    public void updateContent(String baseUrl, String authorization, String repoFilepath, Map<String, String> replaceMap) {
 
         Content content = getContentFileByPath(baseUrl, authorization, repoFilepath);
 
         String data = ContentUtil.replaceData(content, replaceMap);
 
         String contentBase64 = Base64.getEncoder().encodeToString(data.getBytes());
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("message", UPDATE_BY_MESSAGE);
-        paramMap.put("content", contentBase64);
-        paramMap.put("sha", content.getSha());
-        paramMap.put("branch", NEW_BRANCH);
 
-        String url = baseUrl + CONTENT_URL + "/" + repoFilepath + ACCESS_TOKEN_PARA + authorization;
-        restTemplate.put(url, paramMap);
+        String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
 
-        getContentFileByPath(baseUrl, authorization, repoFilepath);
-    }
+        JsonObject payload = new JsonObject();
+        payload.add("message", new JsonPrimitive(UPDATE_BY_MESSAGE));
+        payload.add("content", new JsonPrimitive(contentBase64));
+        payload.add("sha", new JsonPrimitive(content.getSha()));
+        payload.add("branch", new JsonPrimitive(NEW_BRANCH));
 
-    private String getURL(String baseUrl, String authorization, String repoFilepath) {
+        HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
-        return baseUrl +
-                CONTENT_URL +
-                repoFilepath +
-                ACCESS_TOKEN_PARA +
-                authorization;
+        restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                new HttpEntity<>(payload.toString(), headers),
+                Void.class);
     }
 
 }

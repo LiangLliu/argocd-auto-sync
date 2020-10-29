@@ -4,15 +4,9 @@ import com.edwin.gitops.utils.RandomUtil;
 
 public class GitOpsProperties {
 
-    private static final String accessTokenPara = "?access_token=";
-
     private String newBranchName = "branch-" + RandomUtil.generate();
 
     private String defaultBranch = "master";
-
-    public String getAccessTokenPara() {
-        return accessTokenPara;
-    }
 
     public String getNewBranchName() {
         return newBranchName;
