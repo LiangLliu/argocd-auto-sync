@@ -28,16 +28,6 @@ dependencies {
 }
 
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'com.edwin.gitops.GitOpsApplication' // 启动类全路径，需要根据项目自定义，或者不配置
-    }
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
-
-
 // 构建 ./gradlew fatJar
 task fatJar(type: Jar) {
     manifest {
