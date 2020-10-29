@@ -2,6 +2,12 @@ package com.edwin.gitops.client;
 
 import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.domain.pulls.PullRequest;
+import com.edwin.gitops.utils.HttpUtil;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,8 +23,6 @@ public class PullRequestClient {
 
     private final RestTemplate restTemplate;
 
-    private final String ACCESS_TOKEN_PARA;
-
     private static final String PULL_URL = "/pulls";
 
     private final String DEFAULT_BASE_BRANCH;
@@ -29,32 +33,48 @@ public class PullRequestClient {
 
         this.DEFAULT_BASE_BRANCH = gitOpsProperties.getDefaultBranch();
         this.MERGE_COMMIT_MESSAGE = "merge-message,time by " + Instant.now();
-        this.ACCESS_TOKEN_PARA = gitOpsProperties.getAccessTokenPara();
         this.PR_BRANCH_NAME = gitOpsProperties.getNewBranchName();
     }
 
 
     public PullRequest createPullRequest(String baseUrl, String authorization) {
-        String url = baseUrl + PULL_URL + ACCESS_TOKEN_PARA + authorization;
 
-        Map<String, Object> paramMap = new HashMap<>();
+        String url = baseUrl + PULL_URL;
         String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
-        paramMap.put("title", CREATE_PULL_REQUEST_TITLE);
-        paramMap.put("head", PR_BRANCH_NAME);
-        paramMap.put("base", DEFAULT_BASE_BRANCH);
 
-        ResponseEntity<PullRequest> pullRequestResponseEntity = restTemplate.postForEntity(url, paramMap, PullRequest.class);
+        JsonObject payload = new JsonObject();
+        payload.add("title", new JsonPrimitive(CREATE_PULL_REQUEST_TITLE));
+        payload.add("head", new JsonPrimitive(PR_BRANCH_NAME));
+        payload.add("base", new JsonPrimitive(DEFAULT_BASE_BRANCH));
+
+
+        HttpHeaders headers = HttpUtil.getHeaders(authorization);
+
+        ResponseEntity<PullRequest> pullRequestResponseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                new HttpEntity<>(payload.toString(), headers),
+                PullRequest.class);
         return pullRequestResponseEntity.getBody();
 
     }
 
     public void mergePullRequestById(String baseUrl, String authorization, Integer id) {
-        String url = baseUrl + PULL_URL + "/" + id + "/merge" + ACCESS_TOKEN_PARA + authorization;
 
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("commit_message", MERGE_COMMIT_MESSAGE + Instant.now());
 
-        restTemplate.put(url, paramMap);
+        String url = baseUrl + PULL_URL + "/" + id + "/merge";
+
+        JsonObject payload = new JsonObject();
+        payload.add("commit_message", new JsonPrimitive(MERGE_COMMIT_MESSAGE + Instant.now()));
+
+        HttpHeaders headers = HttpUtil.getHeaders(authorization);
+
+        restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                new HttpEntity<>(payload.toString(), headers),
+                Void.class);
+
     }
 
 
