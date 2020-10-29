@@ -37,7 +37,6 @@ public class GitOpsApplication {
 
     }
 
-
     private static ParaObject parsePara(String[] paras) {
 
         ParaObject paraObject = new ParaObject();
