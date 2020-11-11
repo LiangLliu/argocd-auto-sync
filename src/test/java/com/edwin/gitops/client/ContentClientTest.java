@@ -1,6 +1,6 @@
 //package com.edwin.gitops.client;
 //
-//import com.edwin.gitops.domain.content.Content;
+//import com.edwin.gitops.domain.branch.Content;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.context.SpringBootTest;

@@ -1,34 +1,26 @@
 package com.edwin.gitops;
 
 import com.edwin.gitops.client.BranchClient;
-import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.domain.ParaObject;
-import com.edwin.gitops.service.GitHubOpsService;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class GitOpsApplication {
 
-    private static final RestTemplate restTemplate = new RestTemplate();
-    private static final GitOpsProperties gitOpsProperties = new GitOpsProperties();
-
     private static final String baseUrl = "https://api.github.com/repos/";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         printLogo();
 
         ParaObject paraObject = parsePara(args);
 
-        final BranchClient branchClient = new BranchClient(gitOpsProperties, restTemplate);
+        BranchClient branchClient = new BranchClient(paraObject);
 
-        GitHubOpsService gitHubOpsService = new GitHubOpsService(branchClient);
-
-        gitHubOpsService.updateDeploymentTag(paraObject);
+        branchClient.updateDeploymentTag();
         System.out.println("------------------finish------------------------\n");
 
     }

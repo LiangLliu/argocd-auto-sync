@@ -1,6 +1,6 @@
 package com.edwin.gitops.utils;
 
-import com.edwin.gitops.domain.content.Content;
+import com.edwin.gitops.domain.branch.Content;
 
 import java.util.Base64;
 import java.util.Map;

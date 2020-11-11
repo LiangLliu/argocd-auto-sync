@@ -1,44 +1,40 @@
 package com.edwin.gitops.client;
 
-import com.edwin.gitops.config.properties.GitOpsProperties;
-import com.edwin.gitops.domain.content.Content;
-import com.edwin.gitops.domain.pulls.PullRequest;
-import com.edwin.gitops.domain.refs.Branch;
+import com.edwin.gitops.domain.ParaObject;
+import com.edwin.gitops.domain.branch.Content;
+import com.edwin.gitops.domain.branch.PullRequest;
+import com.edwin.gitops.domain.branch.Branch;
 import com.edwin.gitops.utils.ContentUtil;
 import com.edwin.gitops.utils.HttpUtil;
+import com.edwin.gitops.utils.RandomUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.springframework.http.*;
 
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
 public class BranchClient {
-    private final String NEW_BRANCH_NAME;
 
-    private final RestTemplate restTemplate;
-
-    private final String DEFAULT_BASE_BRANCH;
-
-    private final String PR_BRANCH_NAME;
+    private static final String NEW_BRANCH_NAME = "branch-" + RandomUtil.generate();
+    private static final String DEFAULT_BASE_BRANCH = "master";
 
     private static final String CONTENT_URL = "/contents";
     private static final String GIT_REFS_HEAD_URL = "/git/refs/heads";
-    private static final String UPDATE_BY_MESSAGE = "update file, modify tag";
-
     private static final String PULL_URL = "/pulls";
+
+
     private static final String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
 
-    public BranchClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-        this.NEW_BRANCH_NAME = gitOpsProperties.getNewBranchName();
-        this.DEFAULT_BASE_BRANCH = gitOpsProperties.getDefaultBranch();
-        this.PR_BRANCH_NAME = gitOpsProperties.getNewBranchName();
+    private final ParaObject paraObject;
+
+    public BranchClient(ParaObject paraObject) {
+        this.paraObject = paraObject;
     }
 
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public String getMasterBranchSHA(String baseUrl, String authorization) {
         Branch masterBranch = getMasterBranch(baseUrl, authorization);
@@ -120,7 +116,7 @@ public class BranchClient {
 
         JsonObject payload = new JsonObject();
         payload.add("title", new JsonPrimitive(CREATE_PULL_REQUEST_TITLE));
-        payload.add("head", new JsonPrimitive(PR_BRANCH_NAME));
+        payload.add("head", new JsonPrimitive(NEW_BRANCH_NAME));
         payload.add("base", new JsonPrimitive(DEFAULT_BASE_BRANCH));
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
@@ -157,7 +153,13 @@ public class BranchClient {
     }
 
 
-    public void updateDeployment(String baseUrl, String authorization, String filePath, Map<String, String> replaceMap) throws IOException {
+    public void updateDeploymentTag() {
+
+        updateDeployment(paraObject.getUrl(), paraObject.getToken(),
+                paraObject.getFilePath(), paraObject.getReplaceMap());
+    }
+
+    private void updateDeployment(String baseUrl, String authorization, String filePath, Map<String, String> replaceMap) {
 
         updateDeploymentTag(baseUrl, authorization, filePath, replaceMap);
         createAndMergePullRequest(baseUrl, authorization);
@@ -165,7 +167,7 @@ public class BranchClient {
     }
 
 
-    public void updateDeploymentTag(String baseUrl, String authorization, String repoFilepath, Map<String, String> replaceMap) {
+    private void updateDeploymentTag(String baseUrl, String authorization, String repoFilepath, Map<String, String> replaceMap) {
 
 
         createBranchByMaster(baseUrl, authorization);
@@ -177,7 +179,7 @@ public class BranchClient {
         String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
 
         JsonObject payload = new JsonObject();
-        payload.add("message", new JsonPrimitive(UPDATE_BY_MESSAGE));
+        payload.add("message", new JsonPrimitive("update file, modify tag"));
         payload.add("content", new JsonPrimitive(contentBase64));
         payload.add("sha", new JsonPrimitive(content.getSha()));
         payload.add("branch", new JsonPrimitive(NEW_BRANCH_NAME));

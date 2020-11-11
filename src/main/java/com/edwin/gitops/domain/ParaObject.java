@@ -7,6 +7,7 @@ public class ParaObject {
     private String token;
     private String filePath;
     private Map<String, String> replaceMap;
+    private String defaultMasterBranch;
 
     public String getUrl() {
         return url;
@@ -38,6 +39,14 @@ public class ParaObject {
 
     public void setReplaceMap(Map<String, String> replaceMap) {
         this.replaceMap = replaceMap;
+    }
+
+    public String getDefaultMasterBranch() {
+        return defaultMasterBranch;
+    }
+
+    public void setDefaultMasterBranch(String defaultMasterBranch) {
+        this.defaultMasterBranch = defaultMasterBranch;
     }
 
     @Override

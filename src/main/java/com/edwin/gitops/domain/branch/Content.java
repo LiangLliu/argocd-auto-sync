@@ -1,4 +1,4 @@
-package com.edwin.gitops.domain.content;
+package com.edwin.gitops.domain.branch;
 
 
 import java.util.Base64;

@@ -1,4 +1,4 @@
-package com.edwin.gitops.domain.pulls;
+package com.edwin.gitops.domain.branch;
 
 public class PullRequest {
 

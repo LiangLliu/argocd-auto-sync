@@ -1,5 +1,4 @@
-package com.edwin.gitops.domain.refs;
-
+package com.edwin.gitops.domain.branch;
 
 public class Branch {
 
