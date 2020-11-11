@@ -1,7 +1,7 @@
 package com.edwin.gitops.domain.refs;
 
 
-public class Refs {
+public class Branch {
 
     private String ref;
 

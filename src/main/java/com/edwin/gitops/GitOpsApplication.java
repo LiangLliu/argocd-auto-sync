@@ -2,7 +2,7 @@ package com.edwin.gitops;
 
 import com.edwin.gitops.client.ContentClient;
 import com.edwin.gitops.client.PullRequestClient;
-import com.edwin.gitops.client.RefsClient;
+import com.edwin.gitops.client.BranchClient;
 import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.domain.ParaObject;
 import com.edwin.gitops.service.GitHubOpsService;
@@ -22,15 +22,15 @@ public class GitOpsApplication {
 
     public static void main(String[] args) throws IOException {
 
-        System.out.println(getImage());
+        printLogo();
 
         ParaObject paraObject = parsePara(args);
 
-        final RefsClient refsClient = new RefsClient(gitOpsProperties, restTemplate);
+        final BranchClient branchClient = new BranchClient(gitOpsProperties, restTemplate);
         final ContentClient contentClient = new ContentClient(gitOpsProperties, restTemplate);
         final PullRequestClient pullRequestClient = new PullRequestClient(gitOpsProperties, restTemplate);
 
-        GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient, contentClient, refsClient);
+        GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient, contentClient, branchClient);
 
         gitHubOpsService.updateDeploymentTag(paraObject);
         System.out.println("------------------finish------------------------\n");
@@ -65,10 +65,14 @@ public class GitOpsApplication {
     }
 
 
+    private static void printLogo() {
+        System.out.println(getLogo());
+    }
+
     /**
      * http://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
      */
-    private static String getImage() {
+    private static String getLogo() {
         return "\n" +
                 "        .__  __  .__         ___.                                  \n" +
                 "   ____ |__|/  |_|  |__  __ _\\_ |__             ____ ______  ______\n" +

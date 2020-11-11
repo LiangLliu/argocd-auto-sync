@@ -1,7 +1,7 @@
 package com.edwin.gitops.client;
 
 import com.edwin.gitops.config.properties.GitOpsProperties;
-import com.edwin.gitops.domain.refs.Refs;
+import com.edwin.gitops.domain.refs.Branch;
 import com.edwin.gitops.utils.HttpUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -9,7 +9,7 @@ import org.springframework.http.*;
 
 import org.springframework.web.client.RestTemplate;
 
-public class RefsClient {
+public class BranchClient {
     private final String NEW_BRANCH_NAME;
 
     private final RestTemplate restTemplate;
@@ -18,7 +18,7 @@ public class RefsClient {
 
     private final String DEFAULT_BASE_BRANCH;
 
-    public RefsClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
+    public BranchClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
         this.NEW_BRANCH_NAME = gitOpsProperties.getNewBranchName();
         this.DEFAULT_BASE_BRANCH = gitOpsProperties.getDefaultBranch();
@@ -26,27 +26,27 @@ public class RefsClient {
 
 
     public String getMasterBranchSHA(String baseUrl, String authorization) {
-        Refs masterRefs = getMasterRefs(baseUrl, authorization);
-        return masterRefs.getObject().getSha();
+        Branch masterBranch = getMasterBranch(baseUrl, authorization);
+        return masterBranch.getObject().getSha();
     }
 
 
-    public Refs getMasterRefs(String baseUrl, String authorization) {
+    public Branch getMasterBranch(String baseUrl, String authorization) {
 
 
         String url = baseUrl + GIT_REFS_HEAD_URL + "/" + DEFAULT_BASE_BRANCH;
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
-        ResponseEntity<Refs> responseEntity = restTemplate.exchange(url,
+        ResponseEntity<Branch> responseEntity = restTemplate.exchange(url,
                 HttpMethod.GET,
                 new HttpEntity<String>(headers),
-                Refs.class);
+                Branch.class);
 
         return responseEntity.getBody();
     }
 
-    public void createRefs(String baseUrl, String authorization, String masterBranchSHA) {
+    public void createBranch(String baseUrl, String authorization, String masterBranchSHA) {
 
         String url = baseUrl + "/git/refs";
 
@@ -56,21 +56,20 @@ public class RefsClient {
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
-        ResponseEntity<Refs> responseEntity = restTemplate.exchange(url
+        restTemplate.exchange(url
                 , HttpMethod.POST,
                 new HttpEntity<>(payload.toString(), headers),
-                Refs.class);
+                Branch.class);
 
-        responseEntity.getBody();
     }
 
 
-    public void createRefsByMasterBranch(String baseUrl, String authorization) {
+    public void createBranchByMaster(String baseUrl, String authorization) {
         String masterBranchSHA = getMasterBranchSHA(baseUrl, authorization);
-        createRefs(baseUrl, authorization, masterBranchSHA);
+        createBranch(baseUrl, authorization, masterBranchSHA);
     }
 
-    public void deleteRefs(String baseUrl, String authorization) {
+    public void deleteBranch(String baseUrl, String authorization) {
         String url = baseUrl + GIT_REFS_HEAD_URL + "/" + NEW_BRANCH_NAME;
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
