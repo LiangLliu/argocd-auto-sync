@@ -1,6 +1,5 @@
 package com.edwin.gitops;
 
-import com.edwin.gitops.client.ContentClient;
 import com.edwin.gitops.client.PullRequestClient;
 import com.edwin.gitops.client.BranchClient;
 import com.edwin.gitops.config.properties.GitOpsProperties;
@@ -27,10 +26,9 @@ public class GitOpsApplication {
         ParaObject paraObject = parsePara(args);
 
         final BranchClient branchClient = new BranchClient(gitOpsProperties, restTemplate);
-        final ContentClient contentClient = new ContentClient(gitOpsProperties, restTemplate);
         final PullRequestClient pullRequestClient = new PullRequestClient(gitOpsProperties, restTemplate);
 
-        GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient, contentClient, branchClient);
+        GitHubOpsService gitHubOpsService = new GitHubOpsService(pullRequestClient,  branchClient);
 
         gitHubOpsService.updateDeploymentTag(paraObject);
         System.out.println("------------------finish------------------------\n");
