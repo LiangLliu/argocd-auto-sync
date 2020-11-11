@@ -3,7 +3,6 @@ package com.edwin.gitops.utils;
 
 import com.edwin.gitops.utils.props2yaml.Props2Yaml;
 
-import java.io.File;
 import java.util.Arrays;
 
 import java.util.Map;
@@ -26,10 +25,6 @@ public class GitOpsPropertiesUtil {
 
     public static String toYaml(String content) {
         return Props2Yaml.fromContent(content).convert();
-    }
-
-    public static String toYaml(File file){
-        return Props2Yaml.fromFile(file).convert();
     }
 
 }

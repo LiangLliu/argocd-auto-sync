@@ -11,7 +11,6 @@ import org.springframework.http.*;
 
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Base64;
 import java.util.Map;
 
 public class BranchClient {
@@ -19,11 +18,10 @@ public class BranchClient {
 
     private final RestTemplate restTemplate;
 
-    private final String GIT_REFS_HEAD_URL = "/git/refs/heads";
-
     private final String DEFAULT_BASE_BRANCH;
 
     private static final String CONTENT_URL = "/contents";
+    private static final String GIT_REFS_HEAD_URL = "/git/refs/heads";
     private static final String UPDATE_BY_MESSAGE = "update file, modify tag";
 
     public BranchClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
@@ -106,7 +104,6 @@ public class BranchClient {
     }
 
 
-
     public void updateDeploymentTag(String baseUrl, String authorization, String repoFilepath, Map<String, String> replaceMap) {
 
 
@@ -114,9 +111,7 @@ public class BranchClient {
 
         Content content = getContentFileByPath(baseUrl, authorization, repoFilepath);
 
-        String data = ContentUtil.replaceData(content, replaceMap);
-
-        String contentBase64 = Base64.getEncoder().encodeToString(data.getBytes());
+        String contentBase64 = ContentUtil.replaceDataToBase64(content, replaceMap);
 
         String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
 

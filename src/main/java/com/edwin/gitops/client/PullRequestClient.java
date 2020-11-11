@@ -23,6 +23,7 @@ public class PullRequestClient {
     private final RestTemplate restTemplate;
 
     private static final String PULL_URL = "/pulls";
+    private static final String CREATE_PULL_REQUEST_TITLE ="create-pull-request";
 
     private final String DEFAULT_BASE_BRANCH;
     private final String MERGE_COMMIT_MESSAGE;
@@ -39,7 +40,7 @@ public class PullRequestClient {
     public PullRequest createPullRequest(String baseUrl, String authorization) {
 
         String url = baseUrl + PULL_URL;
-        String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
+
 
         JsonObject payload = new JsonObject();
         payload.add("title", new JsonPrimitive(CREATE_PULL_REQUEST_TITLE));

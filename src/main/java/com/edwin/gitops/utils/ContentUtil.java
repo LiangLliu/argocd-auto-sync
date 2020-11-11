@@ -2,18 +2,22 @@ package com.edwin.gitops.utils;
 
 import com.edwin.gitops.domain.content.Content;
 
+import java.util.Base64;
 import java.util.Map;
 
 public class ContentUtil {
     public static String replaceData(Content content, Map<String, String> replaceMap) {
 
-        String contentName = content.getName();
-
         String contentByString = content.getContentByString();
         String propsString = GitOpsYamlUtil.toProperties(contentByString);
         String strOfReplace = GitOpsPropertiesUtil.replaceValue(propsString, replaceMap);
 
-        return  GitOpsPropertiesUtil.toYaml(strOfReplace);
+        return GitOpsPropertiesUtil.toYaml(strOfReplace);
+    }
+
+    public static String replaceDataToBase64(Content content, Map<String, String> replaceMap) {
+        String data = ContentUtil.replaceData(content, replaceMap);
+        return Base64.getEncoder().encodeToString(data.getBytes());
     }
 
 }

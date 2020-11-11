@@ -4,16 +4,12 @@ import com.edwin.gitops.utils.RandomUtil;
 
 public class GitOpsProperties {
 
-    private String newBranchName = "branch-" + RandomUtil.generate();
+    private final String newBranchName = "branch-" + RandomUtil.generate();
 
     private String defaultBranch = "master";
 
     public String getNewBranchName() {
         return newBranchName;
-    }
-
-    public void setNewBranchName(String newBranchName) {
-        this.newBranchName = newBranchName;
     }
 
 
