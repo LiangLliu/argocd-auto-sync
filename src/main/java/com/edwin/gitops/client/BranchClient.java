@@ -2,6 +2,7 @@ package com.edwin.gitops.client;
 
 import com.edwin.gitops.config.properties.GitOpsProperties;
 import com.edwin.gitops.domain.content.Content;
+import com.edwin.gitops.domain.pulls.PullRequest;
 import com.edwin.gitops.domain.refs.Branch;
 import com.edwin.gitops.utils.ContentUtil;
 import com.edwin.gitops.utils.HttpUtil;
@@ -11,6 +12,8 @@ import org.springframework.http.*;
 
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.Map;
 
 public class BranchClient {
@@ -20,14 +23,20 @@ public class BranchClient {
 
     private final String DEFAULT_BASE_BRANCH;
 
+    private final String PR_BRANCH_NAME;
+
     private static final String CONTENT_URL = "/contents";
     private static final String GIT_REFS_HEAD_URL = "/git/refs/heads";
     private static final String UPDATE_BY_MESSAGE = "update file, modify tag";
+
+    private static final String PULL_URL = "/pulls";
+    private static final String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
 
     public BranchClient(GitOpsProperties gitOpsProperties, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
         this.NEW_BRANCH_NAME = gitOpsProperties.getNewBranchName();
         this.DEFAULT_BASE_BRANCH = gitOpsProperties.getDefaultBranch();
+        this.PR_BRANCH_NAME = gitOpsProperties.getNewBranchName();
     }
 
 
@@ -101,6 +110,58 @@ public class BranchClient {
                 new HttpEntity<String>(headers),
                 Content.class);
         return contentResponseEntity.getBody();
+    }
+
+
+    public PullRequest createPullRequest(String baseUrl, String authorization) {
+
+        String url = baseUrl + PULL_URL;
+
+
+        JsonObject payload = new JsonObject();
+        payload.add("title", new JsonPrimitive(CREATE_PULL_REQUEST_TITLE));
+        payload.add("head", new JsonPrimitive(PR_BRANCH_NAME));
+        payload.add("base", new JsonPrimitive(DEFAULT_BASE_BRANCH));
+
+        HttpHeaders headers = HttpUtil.getHeaders(authorization);
+
+        ResponseEntity<PullRequest> pullRequestResponseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                new HttpEntity<>(payload.toString(), headers),
+                PullRequest.class);
+        return pullRequestResponseEntity.getBody();
+
+    }
+
+    public void mergePullRequestById(String baseUrl, String authorization, Integer id) {
+
+
+        String url = baseUrl + PULL_URL + "/" + id + "/merge";
+
+        JsonObject payload = new JsonObject();
+        payload.add("commit_message", new JsonPrimitive("merge-message,time by " + Instant.now()));
+
+        HttpHeaders headers = HttpUtil.getHeaders(authorization);
+
+        restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                new HttpEntity<>(payload.toString(), headers),
+                Void.class);
+    }
+
+    public void createAndMergePullRequest(String baseUrl, String authorization) {
+        PullRequest pullRequest = createPullRequest(baseUrl, authorization);
+        mergePullRequestById(baseUrl, authorization, pullRequest.getNumber());
+    }
+
+
+    public void updateDeployment(String baseUrl, String authorization, String filePath, Map<String, String> replaceMap) throws IOException {
+
+        updateDeploymentTag(baseUrl, authorization, filePath, replaceMap);
+        createAndMergePullRequest(baseUrl, authorization);
+        deleteBranch(baseUrl, authorization);
     }
 
 
