@@ -2,8 +2,10 @@ package com.edwin.gitops.utils;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -48,4 +50,15 @@ public class HttpClientUtil {
     }
 
 
+    public static void delete(String url, String authorization) throws IOException {
+        HttpDelete httpDelete = HttpUtil.getHttpDelete(url, authorization);
+        client.execute(httpDelete);
+    }
+
+    public static <T> T put(String url, String authorization, String jsonParams, Class<T> valueType) throws IOException {
+        HttpPut httpPut = HttpUtil.getHttpPut(url, authorization, jsonParams);
+        HttpEntity entity = client.execute(httpPut).getEntity();
+        String content = EntityUtils.toString(entity, CHARSET);
+        return gson.fromJson(content, valueType);
+    }
 }

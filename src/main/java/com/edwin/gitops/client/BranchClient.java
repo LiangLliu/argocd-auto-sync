@@ -6,15 +6,13 @@ import com.edwin.gitops.domain.branch.PullRequest;
 import com.edwin.gitops.domain.branch.Branch;
 import com.edwin.gitops.utils.ContentUtil;
 import com.edwin.gitops.utils.HttpClientUtil;
-import com.edwin.gitops.utils.HttpUtil;
+
 import com.edwin.gitops.utils.RandomUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import org.springframework.http.*;
 
-import org.springframework.web.client.RestTemplate;
-
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
@@ -36,8 +34,6 @@ public class BranchClient {
     public BranchClient(ParaObject paraObject) {
         this.paraObject = paraObject;
     }
-
-    private final RestTemplate restTemplate = new RestTemplate();
 
 
     private Branch getMasterBranch(String baseUrl, String authorization) throws Exception {
@@ -62,53 +58,27 @@ public class BranchClient {
         payload.add("ref", new JsonPrimitive("refs/heads/" + NEW_BRANCH_NAME));
         payload.add("sha", new JsonPrimitive(masterBranch.getObject().getSha()));
 
-        HttpHeaders headers = HttpUtil.getHeaders(authorization);
-
-
-        Branch post = HttpClientUtil
-                .post(url, authorization, payload.toString(), Branch.class);
-
-        System.out.println(payload.toString());
-
-//
-//        restTemplate.exchange(url
-//                , HttpMethod.POST,
-//                new HttpEntity<>(payload.toString(), headers),
-//                Branch.class);
+        HttpClientUtil.post(url, authorization, payload.toString(), Branch.class);
 
     }
 
 
-    private void deleteBranch(String baseUrl, String authorization) {
+    private void deleteBranch(String baseUrl, String authorization) throws IOException {
         String url = baseUrl + GIT_REFS_HEAD_URL + "/" + NEW_BRANCH_NAME;
 
-        HttpHeaders headers = HttpUtil.getHeaders(authorization);
-
-        restTemplate.exchange(
-                url,
-                HttpMethod.DELETE,
-                new HttpEntity<String>(headers),
-                Void.class);
+        HttpClientUtil.delete(url, authorization);
     }
 
 
-    private Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) {
-
+    private Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) throws Exception {
 
         String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
 
-        HttpHeaders headers = HttpUtil.getHeaders(authorization);
-
-        ResponseEntity<Content> contentResponseEntity = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                new HttpEntity<String>(headers),
-                Content.class);
-        return contentResponseEntity.getBody();
+        return HttpClientUtil.get(url, authorization, Content.class);
     }
 
 
-    private void createAndMergePullRequest(String baseUrl, String authorization) {
+    private void createAndMergePullRequest(String baseUrl, String authorization) throws IOException {
 
         String url = baseUrl + PULL_URL;
 
@@ -117,40 +87,22 @@ public class BranchClient {
         payload.add("head", new JsonPrimitive(NEW_BRANCH_NAME));
         payload.add("base", new JsonPrimitive(DEFAULT_BASE_BRANCH));
 
-        HttpHeaders headers = HttpUtil.getHeaders(authorization);
+        PullRequest pullRequest = HttpClientUtil.post(url, authorization, payload.toString(), PullRequest.class);
 
-        ResponseEntity<PullRequest> pullRequestResponseEntity = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                new HttpEntity<>(payload.toString(), headers),
-                PullRequest.class);
-
-        PullRequest body = pullRequestResponseEntity.getBody();
-
-        if (body == null) {
-            // TODO: 2020/11/12 : 校验body是否为空
-        }
-
-        int number = body.getNumber();
-
-        mergePullRequestById(baseUrl, authorization, number);
+        mergePullRequestById(baseUrl, authorization, pullRequest.getNumber());
 
     }
 
-    private void mergePullRequestById(String baseUrl, String authorization, Integer id) {
+    private void mergePullRequestById(String baseUrl, String authorization, Integer id) throws IOException {
 
         String url = baseUrl + PULL_URL + "/" + id + "/merge";
 
         JsonObject payload = new JsonObject();
         payload.add("commit_message", new JsonPrimitive("merge-message,time by " + Instant.now()));
 
-        HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
-        restTemplate.exchange(
-                url,
-                HttpMethod.PUT,
-                new HttpEntity<>(payload.toString(), headers),
-                Void.class);
+        HttpClientUtil.put(url, authorization, payload.toString(), Void.class);
+
     }
 
 
@@ -187,13 +139,8 @@ public class BranchClient {
         payload.add("sha", new JsonPrimitive(content.getSha()));
         payload.add("branch", new JsonPrimitive(NEW_BRANCH_NAME));
 
-        HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
-        restTemplate.exchange(
-                url,
-                HttpMethod.PUT,
-                new HttpEntity<>(payload.toString(), headers),
-                Void.class);
+        HttpClientUtil.put(url, authorization, payload.toString(), Void.class);
     }
 
 
