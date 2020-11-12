@@ -11,7 +11,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import java.time.Instant;
-import java.util.Map;
 
 public class BranchClient {
 
@@ -21,44 +20,32 @@ public class BranchClient {
         this.paraObject = paraObject;
     }
 
-    private Branch getMasterBranch(String baseUrl, String authorization) throws Exception {
+    private Branch getMasterBranch() throws Exception {
 
-        String url = baseUrl + paraObject.getRefsHeadUrl() + "/" + paraObject.getDefaultBaseBranch();
-
-        try {
-            return HttpClientUtil.get(url, authorization, Branch.class);
-        } catch (Exception e) {
-            throw new Exception(e);
-        }
+        return HttpClientUtil.get(paraObject.getMasterBranchUrl(),
+                paraObject.getToken(),
+                Branch.class);
     }
 
 
-    private void createBranchByMaster(String baseUrl, String authorization) throws Exception {
+    private void createBranchByMaster() throws Exception {
 
-        Branch masterBranch = getMasterBranch(baseUrl, authorization);
+        Branch masterBranch = getMasterBranch();
 
-        String url = baseUrl + "/git/refs";
 
         JsonObject payload = new JsonObject();
         payload.add("ref", new JsonPrimitive("refs/heads/" + paraObject.getNewBranchName()));
         payload.add("sha", new JsonPrimitive(masterBranch.getObject().getSha()));
 
-        HttpClientUtil.post(url, authorization, payload.toString(), Branch.class);
-
+        HttpClientUtil.post(paraObject.getCreateBranchByMasterUrl(),
+                paraObject.getToken(),
+                payload.toString(),
+                Branch.class);
     }
 
 
-    private void deleteBranch(String baseUrl, String authorization) throws Exception {
-        String url = baseUrl + paraObject.getRefsHeadUrl() + "/" + paraObject.getNewBranchName();
-
-        HttpClientUtil.delete(url, authorization);
-    }
-
-    private Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) throws Exception {
-
-        String url = baseUrl + paraObject.getContentUrl() + "/" + repoFilepath;
-
-        return HttpClientUtil.get(url, authorization, Content.class);
+    private void deleteBranch() throws Exception {
+        HttpClientUtil.delete(paraObject.getDeleteBranchUrl(), paraObject.getToken());
     }
 
 
@@ -89,31 +76,20 @@ public class BranchClient {
     }
 
     public void updateDeploymentTag() throws Exception {
-
-        updateDeployment(paraObject.getUrl(),
-                paraObject.getToken(),
-                paraObject.getFilePath(),
-                paraObject.getReplaceMap());
-    }
-
-    private void updateDeployment(String baseUrl, String authorization, String filePath, Map<String, String> replaceMap) throws Exception {
-
-        updateDeploymentTag(baseUrl, authorization, filePath, replaceMap);
-        createAndMergePullRequest(baseUrl, authorization);
-        deleteBranch(baseUrl, authorization);
+        createBranchByMaster();
+        replaceTag();
+        createAndMergePullRequest(paraObject.getBaseUrl(), paraObject.getToken());
+        deleteBranch();
     }
 
 
-    private void updateDeploymentTag(String baseUrl, String authorization, String repoFilepath, Map<String, String> replaceMap) throws Exception {
+    private void replaceTag() throws Exception {
 
+        String url = paraObject.getUpdateDeploymentTagUrl();
 
-        createBranchByMaster(baseUrl, authorization);
+        Content content = HttpClientUtil.get(url, paraObject.getToken(), Content.class);
 
-        Content content = getContentFileByPath(baseUrl, authorization, repoFilepath);
-
-        String contentBase64 = ContentUtil.replaceDataToBase64(content, replaceMap);
-
-        String url = baseUrl + paraObject.getContentUrl() + "/" + repoFilepath;
+        String contentBase64 = ContentUtil.replaceDataToBase64(content, paraObject.getReplaceMap());
 
         JsonObject payload = new JsonObject();
         payload.add("message", new JsonPrimitive("update file, modify tag"));
@@ -121,8 +97,7 @@ public class BranchClient {
         payload.add("sha", new JsonPrimitive(content.getSha()));
         payload.add("branch", new JsonPrimitive(paraObject.getNewBranchName()));
 
-
-        HttpClientUtil.put(url, authorization, payload.toString(), Void.class);
+        HttpClientUtil.put(url, paraObject.getToken(), payload.toString(), Void.class);
     }
 
 

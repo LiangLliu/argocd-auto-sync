@@ -34,7 +34,7 @@ public class GitOpsApplication {
     private static ParaObject parsePara(String[] paras) {
 
         ParaObject paraObject = new ParaObject();
-        paraObject.setUrl(baseUrl + paras[0]);
+        paraObject.setBaseUrl(baseUrl + paras[0]);
         paraObject.setToken(paras[1]);
         paraObject.setFilePath(paras[2]);
         paraObject.setReplaceMap(parseToMap(paras[3]));

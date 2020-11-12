@@ -3,7 +3,7 @@ package com.edwin.gitops.domain;
 import java.util.Map;
 
 public class ParaObject {
-    private String url;
+    private String baseUrl;
     private String token;
     private String filePath;
     private Map<String, String> replaceMap;
@@ -11,12 +11,12 @@ public class ParaObject {
     private String newBranchName;
 
 
-    public String getUrl() {
-        return url;
+    public String getBaseUrl() {
+        return baseUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 
     public String getToken() {
@@ -80,5 +80,29 @@ public class ParaObject {
         return sb.toString();
     }
 
+
+    public String getMasterBranchUrl() {
+        return getBaseUrl() + getRefsHeadUrl() + "/" + getDefaultBaseBranch();
+    }
+
+    public String getCreateBranchByMasterUrl() {
+        return baseUrl + "/git/refs";
+    }
+
+
+    public String getDeleteBranchUrl() {
+        return baseUrl + getRefsHeadUrl() + "/" + getNewBranchName();
+    }
+
+    public String getUpdateDeploymentTagUrl() {
+        return baseUrl + getContentUrl() + "/" + getFilePath();
+    }
+
+
+    public String getContentFileByPathUrl() {
+
+
+       return baseUrl + getContentUrl() + "/" + getFilePath();
+    }
 
 }
