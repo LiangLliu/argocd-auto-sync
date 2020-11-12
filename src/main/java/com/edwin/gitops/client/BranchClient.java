@@ -11,8 +11,6 @@ import com.edwin.gitops.utils.RandomUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 
@@ -63,12 +61,11 @@ public class BranchClient {
     }
 
 
-    private void deleteBranch(String baseUrl, String authorization) throws IOException {
+    private void deleteBranch(String baseUrl, String authorization) throws Exception {
         String url = baseUrl + GIT_REFS_HEAD_URL + "/" + NEW_BRANCH_NAME;
 
         HttpClientUtil.delete(url, authorization);
     }
-
 
     private Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) throws Exception {
 
@@ -78,7 +75,7 @@ public class BranchClient {
     }
 
 
-    private void createAndMergePullRequest(String baseUrl, String authorization) throws IOException {
+    private void createAndMergePullRequest(String baseUrl, String authorization) throws Exception {
 
         String url = baseUrl + PULL_URL;
 
@@ -93,13 +90,12 @@ public class BranchClient {
 
     }
 
-    private void mergePullRequestById(String baseUrl, String authorization, Integer id) throws IOException {
+    private void mergePullRequestById(String baseUrl, String authorization, Integer id) throws Exception {
 
         String url = baseUrl + PULL_URL + "/" + id + "/merge";
 
         JsonObject payload = new JsonObject();
         payload.add("commit_message", new JsonPrimitive("merge-message,time by " + Instant.now()));
-
 
         HttpClientUtil.put(url, authorization, payload.toString(), Void.class);
 
