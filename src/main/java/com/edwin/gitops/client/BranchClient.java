@@ -40,7 +40,7 @@ public class BranchClient {
     private final RestTemplate restTemplate = new RestTemplate();
 
 
-    public Branch getMasterBranch(String baseUrl, String authorization) throws Exception {
+    private Branch getMasterBranch(String baseUrl, String authorization) throws Exception {
 
         String url = baseUrl + GIT_REFS_HEAD_URL + "/" + DEFAULT_BASE_BRANCH;
 
@@ -64,10 +64,17 @@ public class BranchClient {
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
-        restTemplate.exchange(url
-                , HttpMethod.POST,
-                new HttpEntity<>(payload.toString(), headers),
-                Branch.class);
+
+        Branch post = HttpClientUtil
+                .post(url, authorization, payload.toString(), Branch.class);
+
+        System.out.println(payload.toString());
+
+//
+//        restTemplate.exchange(url
+//                , HttpMethod.POST,
+//                new HttpEntity<>(payload.toString(), headers),
+//                Branch.class);
 
     }
 

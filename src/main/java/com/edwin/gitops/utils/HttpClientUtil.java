@@ -3,9 +3,12 @@ package com.edwin.gitops.utils;
 import com.google.gson.Gson;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
 
 import java.util.Map;
 
@@ -22,9 +25,24 @@ public class HttpClientUtil {
         return get(url, authorization, null, valueType);
     }
 
-    public static <T> T get(String url, String authorization, Map<String, String> param, Class<T> valueType) throws Exception {
+    public static <T> T get(String url, String authorization, Map<String, String> param, Class<T> valueType) throws IOException {
         HttpGet httpGet = HttpUtil.getHttpGet(url, authorization, param);
         HttpEntity entity = client.execute(httpGet).getEntity();
+        String content = EntityUtils.toString(entity, CHARSET);
+        return gson.fromJson(content, valueType);
+    }
+
+
+    public static <T> T post(String url, String authorization, Map<String, String> params, Class<T> valueType) throws IOException {
+        HttpPost httpPost = HttpUtil.getHttpPost(url, authorization, params);
+        HttpEntity entity = client.execute(httpPost).getEntity();
+        String content = EntityUtils.toString(entity, CHARSET);
+        return gson.fromJson(content, valueType);
+    }
+
+    public static <T> T post(String url, String authorization, String jsonParams, Class<T> valueType) throws IOException {
+        HttpPost httpPost = HttpUtil.getHttpPost(url, authorization, jsonParams);
+        HttpEntity entity = client.execute(httpPost).getEntity();
         String content = EntityUtils.toString(entity, CHARSET);
         return gson.fromJson(content, valueType);
     }
