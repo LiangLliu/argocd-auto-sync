@@ -5,16 +5,19 @@ import com.edwin.gitops.domain.branch.Content;
 import com.edwin.gitops.domain.branch.PullRequest;
 import com.edwin.gitops.domain.branch.Branch;
 import com.edwin.gitops.utils.ContentUtil;
+import com.edwin.gitops.utils.HttpClientUtil;
 import com.edwin.gitops.utils.HttpUtil;
 import com.edwin.gitops.utils.RandomUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 import org.springframework.http.*;
 
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.util.Map;
+
 
 public class BranchClient {
 
@@ -36,34 +39,28 @@ public class BranchClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String getMasterBranchSHA(String baseUrl, String authorization) {
-        Branch masterBranch = getMasterBranch(baseUrl, authorization);
-        return masterBranch.getObject().getSha();
-    }
 
-
-    public Branch getMasterBranch(String baseUrl, String authorization) {
-
+    public Branch getMasterBranch(String baseUrl, String authorization) throws Exception {
 
         String url = baseUrl + GIT_REFS_HEAD_URL + "/" + DEFAULT_BASE_BRANCH;
 
-        HttpHeaders headers = HttpUtil.getHeaders(authorization);
-
-        ResponseEntity<Branch> responseEntity = restTemplate.exchange(url,
-                HttpMethod.GET,
-                new HttpEntity<String>(headers),
-                Branch.class);
-
-        return responseEntity.getBody();
+        try {
+            return HttpClientUtil.get(url, authorization, Branch.class);
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
     }
 
-    public void createBranch(String baseUrl, String authorization, String masterBranchSHA) {
+
+    private void createBranchByMaster(String baseUrl, String authorization) throws Exception {
+
+        Branch masterBranch = getMasterBranch(baseUrl, authorization);
 
         String url = baseUrl + "/git/refs";
 
         JsonObject payload = new JsonObject();
         payload.add("ref", new JsonPrimitive("refs/heads/" + NEW_BRANCH_NAME));
-        payload.add("sha", new JsonPrimitive(masterBranchSHA));
+        payload.add("sha", new JsonPrimitive(masterBranch.getObject().getSha()));
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
 
@@ -75,12 +72,7 @@ public class BranchClient {
     }
 
 
-    public void createBranchByMaster(String baseUrl, String authorization) {
-        String masterBranchSHA = getMasterBranchSHA(baseUrl, authorization);
-        createBranch(baseUrl, authorization, masterBranchSHA);
-    }
-
-    public void deleteBranch(String baseUrl, String authorization) {
+    private void deleteBranch(String baseUrl, String authorization) {
         String url = baseUrl + GIT_REFS_HEAD_URL + "/" + NEW_BRANCH_NAME;
 
         HttpHeaders headers = HttpUtil.getHeaders(authorization);
@@ -93,7 +85,7 @@ public class BranchClient {
     }
 
 
-    public Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) {
+    private Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) {
 
 
         String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
@@ -109,10 +101,9 @@ public class BranchClient {
     }
 
 
-    public PullRequest createPullRequest(String baseUrl, String authorization) {
+    private void createAndMergePullRequest(String baseUrl, String authorization) {
 
         String url = baseUrl + PULL_URL;
-
 
         JsonObject payload = new JsonObject();
         payload.add("title", new JsonPrimitive(CREATE_PULL_REQUEST_TITLE));
@@ -126,12 +117,20 @@ public class BranchClient {
                 HttpMethod.POST,
                 new HttpEntity<>(payload.toString(), headers),
                 PullRequest.class);
-        return pullRequestResponseEntity.getBody();
+
+        PullRequest body = pullRequestResponseEntity.getBody();
+
+        if (body == null) {
+            // TODO: 2020/11/12 : 校验body是否为空
+        }
+
+        int number = body.getNumber();
+
+        mergePullRequestById(baseUrl, authorization, number);
 
     }
 
-    public void mergePullRequestById(String baseUrl, String authorization, Integer id) {
-
+    private void mergePullRequestById(String baseUrl, String authorization, Integer id) {
 
         String url = baseUrl + PULL_URL + "/" + id + "/merge";
 
@@ -147,19 +146,16 @@ public class BranchClient {
                 Void.class);
     }
 
-    public void createAndMergePullRequest(String baseUrl, String authorization) {
-        PullRequest pullRequest = createPullRequest(baseUrl, authorization);
-        mergePullRequestById(baseUrl, authorization, pullRequest.getNumber());
+
+    public void updateDeploymentTag() throws Exception {
+
+        updateDeployment(paraObject.getUrl(),
+                paraObject.getToken(),
+                paraObject.getFilePath(),
+                paraObject.getReplaceMap());
     }
 
-
-    public void updateDeploymentTag() {
-
-        updateDeployment(paraObject.getUrl(), paraObject.getToken(),
-                paraObject.getFilePath(), paraObject.getReplaceMap());
-    }
-
-    private void updateDeployment(String baseUrl, String authorization, String filePath, Map<String, String> replaceMap) {
+    private void updateDeployment(String baseUrl, String authorization, String filePath, Map<String, String> replaceMap) throws Exception {
 
         updateDeploymentTag(baseUrl, authorization, filePath, replaceMap);
         createAndMergePullRequest(baseUrl, authorization);
@@ -167,7 +163,7 @@ public class BranchClient {
     }
 
 
-    private void updateDeploymentTag(String baseUrl, String authorization, String repoFilepath, Map<String, String> replaceMap) {
+    private void updateDeploymentTag(String baseUrl, String authorization, String repoFilepath, Map<String, String> replaceMap) throws Exception {
 
 
         createBranchByMaster(baseUrl, authorization);

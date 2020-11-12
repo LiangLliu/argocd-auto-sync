@@ -17,10 +17,6 @@ public class TreeBuilder {
         this.useNumericKeysAsArrayIndexes = useNumericKeysAsArrayIndexes;
     }
 
-    public TreeBuilder(Properties properties) {
-        this(properties, true);
-    }
-
     public PropertyTree build() {
         PropertyTree root = new PropertyTree();
         properties.stringPropertyNames().stream()

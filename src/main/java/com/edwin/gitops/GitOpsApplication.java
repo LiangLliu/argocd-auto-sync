@@ -3,7 +3,6 @@ package com.edwin.gitops;
 import com.edwin.gitops.client.BranchClient;
 import com.edwin.gitops.domain.ParaObject;
 
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,12 @@ public class GitOpsApplication {
 
         BranchClient branchClient = new BranchClient(paraObject);
 
-        branchClient.updateDeploymentTag();
+        try {
+            branchClient.updateDeploymentTag();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.out.println("------------------finish------------------------\n");
 
     }

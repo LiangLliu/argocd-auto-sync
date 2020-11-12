@@ -32,4 +32,15 @@ public class Branch {
     public void setObject(Object object) {
         this.object = object;
     }
+
+
+
+    @Override
+    public String toString() {
+        return "Branch{" +
+                "ref='" + ref + '\'' +
+                ", url='" + url + '\'' +
+                ", object=" + object +
+                '}';
+    }
 }
