@@ -27,11 +27,16 @@ public class BranchClient {
                 Branch.class);
     }
 
+    public void updateDeploymentTag() throws Exception {
+        createBranchByMaster();
+        replaceTag();
+        createAndMergePullRequest();
+        deleteBranch();
+    }
 
     private void createBranchByMaster() throws Exception {
 
         Branch masterBranch = getMasterBranch();
-
 
         JsonObject payload = new JsonObject();
         payload.add("ref", new JsonPrimitive("refs/heads/" + paraObject.getNewBranchName()));
@@ -49,39 +54,31 @@ public class BranchClient {
     }
 
 
-    private void createAndMergePullRequest(String baseUrl, String authorization) throws Exception {
+    private void createAndMergePullRequest() throws Exception {
 
-        String url = baseUrl + paraObject.getPullUrl();
+        String url = paraObject.getPullUrl();
 
         JsonObject payload = new JsonObject();
         payload.add("title", new JsonPrimitive(paraObject.getCreatePullRequestTitle()));
         payload.add("head", new JsonPrimitive(paraObject.getNewBranchName()));
         payload.add("base", new JsonPrimitive(paraObject.getDefaultBaseBranch()));
 
-        PullRequest pullRequest = HttpClientUtil.post(url, authorization, payload.toString(), PullRequest.class);
+        PullRequest pullRequest = HttpClientUtil.post(url, paraObject.getToken(), payload.toString(), PullRequest.class);
 
-        mergePullRequestById(baseUrl, authorization, pullRequest.getNumber());
+        mergePullRequestById(pullRequest.getNumber());
 
     }
 
-    private void mergePullRequestById(String baseUrl, String authorization, Integer id) throws Exception {
+    private void mergePullRequestById(Integer id) throws Exception {
 
-        String url = baseUrl + paraObject.getPullUrl() + "/" + id + "/merge";
+        String url = paraObject.getPullUrl() + "/" + id + "/merge";
 
         JsonObject payload = new JsonObject();
         payload.add("commit_message", new JsonPrimitive("merge-message,time by " + Instant.now()));
 
-        HttpClientUtil.put(url, authorization, payload.toString(), Void.class);
+        HttpClientUtil.put(url, paraObject.getToken(), payload.toString(), Void.class);
 
     }
-
-    public void updateDeploymentTag() throws Exception {
-        createBranchByMaster();
-        replaceTag();
-        createAndMergePullRequest(paraObject.getBaseUrl(), paraObject.getToken());
-        deleteBranch();
-    }
-
 
     private void replaceTag() throws Exception {
 
@@ -99,6 +96,4 @@ public class BranchClient {
 
         HttpClientUtil.put(url, paraObject.getToken(), payload.toString(), Void.class);
     }
-
-
 }

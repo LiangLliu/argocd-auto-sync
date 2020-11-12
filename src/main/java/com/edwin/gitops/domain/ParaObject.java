@@ -65,7 +65,7 @@ public class ParaObject {
     }
 
     public String getPullUrl() {
-        return "/pulls";
+        return baseUrl + "/pulls";
     }
 
     public String getRefsHeadUrl() {
@@ -98,11 +98,5 @@ public class ParaObject {
         return baseUrl + getContentUrl() + "/" + getFilePath();
     }
 
-
-    public String getContentFileByPathUrl() {
-
-
-       return baseUrl + getContentUrl() + "/" + getFilePath();
-    }
 
 }
