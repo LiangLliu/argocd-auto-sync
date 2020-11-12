@@ -7,7 +7,9 @@ public class ParaObject {
     private String token;
     private String filePath;
     private Map<String, String> replaceMap;
-    private String defaultMasterBranch;
+    private String defaultBaseBranch;
+    private String newBranchName;
+
 
     public String getUrl() {
         return url;
@@ -41,21 +43,42 @@ public class ParaObject {
         this.replaceMap = replaceMap;
     }
 
-    public String getDefaultMasterBranch() {
-        return defaultMasterBranch;
+    public String getDefaultBaseBranch() {
+        return defaultBaseBranch;
     }
 
-    public void setDefaultMasterBranch(String defaultMasterBranch) {
-        this.defaultMasterBranch = defaultMasterBranch;
+    public void setDefaultBaseBranch(String defaultBaseBranch) {
+        this.defaultBaseBranch = defaultBaseBranch;
     }
 
-    @Override
-    public String toString() {
-        return "ParaObject{" +
-                "userAndRepo='" + url + '\'' +
-                ", token='" + token + '\'' +
-                ", filePath='" + filePath + '\'' +
-                ", replaceMap=" + replaceMap +
-                '}';
+
+    public String getNewBranchName() {
+        return newBranchName;
     }
+
+    public void setNewBranchName(String newBranchName) {
+        this.newBranchName = newBranchName;
+    }
+
+    public String getContentUrl() {
+        return "/contents";
+    }
+
+    public String getPullUrl() {
+        return "/pulls";
+    }
+
+    public String getRefsHeadUrl() {
+        return "/git/refs/heads";
+    }
+
+    public String getCreatePullRequestTitle() {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Update ").append(filePath).append(" ");
+        replaceMap.forEach((key, value) -> sb.append(key).append(" to ").append(value).append(" "));
+        return sb.toString();
+    }
+
+
 }

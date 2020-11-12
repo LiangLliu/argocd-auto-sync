@@ -2,6 +2,7 @@ package com.edwin.gitops;
 
 import com.edwin.gitops.client.BranchClient;
 import com.edwin.gitops.domain.ParaObject;
+import com.edwin.gitops.utils.RandomUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Map;
 public class GitOpsApplication {
 
     private static final String baseUrl = "https://api.github.com/repos/";
+    private static final String defaultBaseBranch = "master";
 
     public static void main(String[] args) {
 
@@ -36,6 +38,9 @@ public class GitOpsApplication {
         paraObject.setToken(paras[1]);
         paraObject.setFilePath(paras[2]);
         paraObject.setReplaceMap(parseToMap(paras[3]));
+        paraObject.setDefaultBaseBranch(defaultBaseBranch);
+
+        paraObject.setNewBranchName("branch-" + RandomUtil.generate());
         return paraObject;
     }
 

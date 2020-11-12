@@ -7,25 +7,13 @@ import com.edwin.gitops.domain.branch.Branch;
 import com.edwin.gitops.utils.ContentUtil;
 import com.edwin.gitops.utils.HttpClientUtil;
 
-import com.edwin.gitops.utils.RandomUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import java.time.Instant;
 import java.util.Map;
 
-
 public class BranchClient {
-
-    private static final String NEW_BRANCH_NAME = "branch-" + RandomUtil.generate();
-    private static final String DEFAULT_BASE_BRANCH = "master";
-
-    private static final String CONTENT_URL = "/contents";
-    private static final String GIT_REFS_HEAD_URL = "/git/refs/heads";
-    private static final String PULL_URL = "/pulls";
-
-
-    private static final String CREATE_PULL_REQUEST_TITLE = "create-pull-request";
 
     private final ParaObject paraObject;
 
@@ -33,10 +21,9 @@ public class BranchClient {
         this.paraObject = paraObject;
     }
 
-
     private Branch getMasterBranch(String baseUrl, String authorization) throws Exception {
 
-        String url = baseUrl + GIT_REFS_HEAD_URL + "/" + DEFAULT_BASE_BRANCH;
+        String url = baseUrl + paraObject.getRefsHeadUrl() + "/" + paraObject.getDefaultBaseBranch();
 
         try {
             return HttpClientUtil.get(url, authorization, Branch.class);
@@ -53,7 +40,7 @@ public class BranchClient {
         String url = baseUrl + "/git/refs";
 
         JsonObject payload = new JsonObject();
-        payload.add("ref", new JsonPrimitive("refs/heads/" + NEW_BRANCH_NAME));
+        payload.add("ref", new JsonPrimitive("refs/heads/" + paraObject.getNewBranchName()));
         payload.add("sha", new JsonPrimitive(masterBranch.getObject().getSha()));
 
         HttpClientUtil.post(url, authorization, payload.toString(), Branch.class);
@@ -62,14 +49,14 @@ public class BranchClient {
 
 
     private void deleteBranch(String baseUrl, String authorization) throws Exception {
-        String url = baseUrl + GIT_REFS_HEAD_URL + "/" + NEW_BRANCH_NAME;
+        String url = baseUrl + paraObject.getRefsHeadUrl() + "/" + paraObject.getNewBranchName();
 
         HttpClientUtil.delete(url, authorization);
     }
 
     private Content getContentFileByPath(String baseUrl, String authorization, String repoFilepath) throws Exception {
 
-        String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
+        String url = baseUrl + paraObject.getContentUrl() + "/" + repoFilepath;
 
         return HttpClientUtil.get(url, authorization, Content.class);
     }
@@ -77,12 +64,12 @@ public class BranchClient {
 
     private void createAndMergePullRequest(String baseUrl, String authorization) throws Exception {
 
-        String url = baseUrl + PULL_URL;
+        String url = baseUrl + paraObject.getPullUrl();
 
         JsonObject payload = new JsonObject();
-        payload.add("title", new JsonPrimitive(CREATE_PULL_REQUEST_TITLE));
-        payload.add("head", new JsonPrimitive(NEW_BRANCH_NAME));
-        payload.add("base", new JsonPrimitive(DEFAULT_BASE_BRANCH));
+        payload.add("title", new JsonPrimitive(paraObject.getCreatePullRequestTitle()));
+        payload.add("head", new JsonPrimitive(paraObject.getNewBranchName()));
+        payload.add("base", new JsonPrimitive(paraObject.getDefaultBaseBranch()));
 
         PullRequest pullRequest = HttpClientUtil.post(url, authorization, payload.toString(), PullRequest.class);
 
@@ -92,7 +79,7 @@ public class BranchClient {
 
     private void mergePullRequestById(String baseUrl, String authorization, Integer id) throws Exception {
 
-        String url = baseUrl + PULL_URL + "/" + id + "/merge";
+        String url = baseUrl + paraObject.getPullUrl() + "/" + id + "/merge";
 
         JsonObject payload = new JsonObject();
         payload.add("commit_message", new JsonPrimitive("merge-message,time by " + Instant.now()));
@@ -100,7 +87,6 @@ public class BranchClient {
         HttpClientUtil.put(url, authorization, payload.toString(), Void.class);
 
     }
-
 
     public void updateDeploymentTag() throws Exception {
 
@@ -127,13 +113,13 @@ public class BranchClient {
 
         String contentBase64 = ContentUtil.replaceDataToBase64(content, replaceMap);
 
-        String url = baseUrl + CONTENT_URL + "/" + repoFilepath;
+        String url = baseUrl + paraObject.getContentUrl() + "/" + repoFilepath;
 
         JsonObject payload = new JsonObject();
         payload.add("message", new JsonPrimitive("update file, modify tag"));
         payload.add("content", new JsonPrimitive(contentBase64));
         payload.add("sha", new JsonPrimitive(content.getSha()));
-        payload.add("branch", new JsonPrimitive(NEW_BRANCH_NAME));
+        payload.add("branch", new JsonPrimitive(paraObject.getNewBranchName()));
 
 
         HttpClientUtil.put(url, authorization, payload.toString(), Void.class);
