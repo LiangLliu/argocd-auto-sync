@@ -1,12 +1,20 @@
 # github ops小工具
 
-使用github api 操作github。
+* 问题：
+    * 向master提交代码后，Jenkins会触发build最终生成一个docker image
+    * Argo CD 是通过指定docker image 的 tag 的方式，来部署对应工程版本
+    * 此时我们需要将master分支构建后的image tag 更新到 Argo CD的repo中
+    
+* 解决：
+    * 在Jenkins中设置定时任务，build完成后，更新Argo CD repo 的step
+    * 通过调用 github api的方式操作，更新Argo CD 的 repo
+
 
 ## 构建jar包
 
 * 构建jar包
 ```shell script
-./gradlew fatJar
+./gradlew clean && ./gradlew fatJar
 ```
 
 * 运行
@@ -25,16 +33,10 @@ java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar
 | filePath            | 配置文件所在的粒径   | 临时文件缓存目录，用于保存临时处理的文件，处理后会被删除 |
 | replaceMap         | <key,value>       | 需要替换的内容                                      |
 
-* 示例
+## 运行
 ```shell script
 java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar user/repo token filepath [image.tag=11111, replicaCount=5]
 ```
-```shell script
-java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar user/repo token filepath \[image.tag=11111,replicaCount=5\]
-
-```
-
-
 
 
 ## docker 打包

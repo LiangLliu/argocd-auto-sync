@@ -29,7 +29,7 @@ public class BranchClient {
 
     public void updateDeploymentTag() throws Exception {
         createBranchByMaster();
-        replaceTag();
+        replaceTagAndCommit();
         createAndMergePullRequest();
         deleteBranch();
     }
@@ -74,13 +74,13 @@ public class BranchClient {
         String url = paraObject.getPullUrl() + "/" + id + "/merge";
 
         JsonObject payload = new JsonObject();
-        payload.add("commit_message", new JsonPrimitive("merge-message,time by " + Instant.now()));
+        payload.add("commit_message", new JsonPrimitive("merge pull request,time by " + Instant.now()));
 
         HttpClientUtil.put(url, paraObject.getToken(), payload.toString(), Void.class);
 
     }
 
-    private void replaceTag() throws Exception {
+    private void replaceTagAndCommit() throws Exception {
 
         String url = paraObject.getUpdateDeploymentTagUrl();
 
@@ -89,7 +89,7 @@ public class BranchClient {
         String contentBase64 = ContentUtil.replaceDataToBase64(content, paraObject.getReplaceMap());
 
         JsonObject payload = new JsonObject();
-        payload.add("message", new JsonPrimitive("update file, modify tag"));
+        payload.add("message", new JsonPrimitive("update " + paraObject.getFilePath() + ", modify tag"));
         payload.add("content", new JsonPrimitive(contentBase64));
         payload.add("sha", new JsonPrimitive(content.getSha()));
         payload.add("branch", new JsonPrimitive(paraObject.getNewBranchName()));
