@@ -4,7 +4,7 @@ apply plugin: 'idea'
 apply plugin: "application"
 
 group = 'com.edwin'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 sourceCompatibility = '8'
 
 configurations {
@@ -27,11 +27,13 @@ dependencies {
 }
 
 
+
 // 构建 ./gradlew fatJar
 task fatJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'com.edwin.gitops.GitOpsApplication' // 启动类全路径，需要根据项目自定义，或者不配置
     }
+    archiveName "argocd-auto-sync-${version}.jar"
     baseName = project.name + '-fatJar'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

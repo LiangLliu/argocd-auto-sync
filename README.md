@@ -19,7 +19,7 @@
 
 * 运行
 ```shell script
-java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar 
+java -jar build/libs/argocd-auto-sync-0.0.1.jar
 ```  
 
 
@@ -35,32 +35,30 @@ java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar
 
 ## 运行
 ```shell script
-java -jar build/libs/git-ops-fatJar-0.0.1-SNAPSHOT.jar user/repo token filepath [image.tag=11111, replicaCount=5]
+java -jar build/libs/argocd-auto-sync-0.0.1.jar user/repo token filepath [image.tag=11111, replicaCount=5]
 ```
-
 
 ## docker 打包
 
-
 * 构建生成jar包并运行
 ```shell script
-./gradlew clean && ./gradlew fatJar -x test && java -jar git-ops-fatJar-0.0.1-SNAPSHOT.jar
+./gradlew clean && ./gradlew fatJar 
 
 ```
 
 * 生成 docker image
 ```docker
-docker build -t localhost/github-ops .
+docker build -t thoughtworks/argocd-auto-sync .
 ```
 
 
 * 启动docker image
 ```docker
-docker run --name github_ops -p 8080:8080 -t localhost/github-ops user/repo token filepath \[image.tag=11111,replicaCount=5\] 
+docker run --name argocd-auto-sync -p 8080:8080 -t thoughtworks/argocd-auto-sync user/repo token filepath \[image.tag=11111,replicaCount=5\] 
 ```
 
-* 进入docker container
+* 查看docker执行日志
 ```docker
-docker exec -it github_ops sh
+docker logs -f -t argocd-auto-sync
 ``` 
 
